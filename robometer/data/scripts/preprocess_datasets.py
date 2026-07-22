@@ -897,13 +897,17 @@ class DatasetPreprocessor:
             )
             return dataset
         else:
-            # Load from local disk (a generate_hf_dataset.py output directory).
-            # Its `frames` column holds paths relative to the generation
-            # output_dir (the *parent* of dataset_path), and unlike the Hub
-            # branch nothing has built `frames_video` yet — without it every
-            # trajectory is silently dropped downstream. Mirror the Hub
+            # Load from local disk (a generate_hf_dataset.py output directory,
+            # written with Dataset.save_to_disk — load_dataset() refuses those,
+            # so use load_from_disk). Its `frames` column holds paths relative
+            # to the generation output_dir (the *parent* of dataset_path; the
+            # sequential converter path writes them absolute), and unlike the
+            # Hub branch nothing has built `frames_video` yet — without it
+            # every trajectory is silently dropped downstream. Mirror the Hub
             # branch's patching with absolute local paths.
-            dataset = load_dataset(dataset_path)
+            from datasets import load_from_disk
+
+            dataset = load_from_disk(dataset_path)
             output_root = os.path.dirname(os.path.abspath(dataset_path))
 
             def patch_local_path(old_path):

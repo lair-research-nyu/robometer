@@ -22,7 +22,8 @@ output:
   fps: 10
   shortest_edge_size: 240
   center_crop: false
-  num_workers: 8
+  num_workers: 8           # each spawn worker re-imports TF (~2G); use 0
+                           # (sequential) on memory-capped login nodes
 
 hub:
   push_to_hub: false
