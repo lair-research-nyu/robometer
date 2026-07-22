@@ -1,0 +1,43 @@
+# Preprocess config for the towerstack LeRobot conversion (local, no Hub).
+#
+# Order: 1) generate_hf_dataset (data_gen_configs/towerstack.yaml)
+#        2) this preprocess  3) train.
+#
+# Run from the robometer repo root so the relative path below resolves (the
+# same path generate_hf_dataset wrote to: output.output_dir/<dataset_name>).
+#
+# Before running:
+#   export ROBOMETER_PROCESSED_DATASETS_PATH=/path/to/save/processed_datasets
+#   uv run python -m robometer.data.scripts.preprocess_datasets \
+#     --config robometer/configs/preprocess_towerstack.yaml \
+#     --cache_dir=$ROBOMETER_PROCESSED_DATASETS_PATH
+#
+# Cache key = "<dataset_path>/<subset>" with "/" -> "_", so training uses:
+#   data.train_datasets=[robometer_dataset_lerobot_towerstack_towerstack]
+# NOTE: absolute frame paths are baked into the cache — don't move it after.
+
+train_datasets:
+  - "robometer_dataset/lerobot_towerstack"
+
+train_subsets:
+  - ["towerstack"]
+
+eval_datasets:
+  - "robometer_dataset/lerobot_towerstack"
+
+eval_subsets:
+  - ["towerstack"]
+
+max_frames_for_preprocessing: 32
+video_frame_sampling: "uniform"
+num_proc: 1
+num_threads: 4
+force_reprocess: false
+cache_dir: /scratch/ka3658/robometer_processed
+
+# Embedding preprocessing (optional; set false for faster preprocessing without embeddings)
+precompute_embeddings: false
+embeddings_cache_dir: "embeddings"
+dinov2_model: "facebook/dinov2-base"
+sentence_model: "sentence-transformers/all-MiniLM-L12-v2"
+embedding_batch_size: 64

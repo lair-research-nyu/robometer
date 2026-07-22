@@ -1,0 +1,29 @@
+# Towerstack (LeRobot v3.0, ultra-tools rrd_to_lerobot output) dataset config.
+#
+#   uv run python -m dataset_upload.generate_hf_dataset \
+#     --config_path dataset_upload/configs/data_gen_configs/towerstack.yaml
+#
+# Local-only flow (no Hub push): the arrow dataset + per-trajectory mp4 clips
+# land in output_dir/<dataset_name>. Point the preprocess config's
+# train_datasets at that directory. data_source must match the entry in
+# robometer/data/dataset_success_cutoff.txt.
+dataset:
+  dataset_path: /mnt/wdblack/chunk1
+  dataset_name: lerobot_towerstack
+  camera: head
+  subtask: ""            # e.g. "stack rings" to filter; "" = all tasks
+  data_source: towerstack
+
+output:
+  output_dir: robometer_dataset
+  max_trajectories: -1
+  max_frames: 64
+  use_video: true
+  fps: 10
+  shortest_edge_size: 240
+  center_crop: false
+  num_workers: 8
+
+hub:
+  push_to_hub: false
+  hub_repo_id: null

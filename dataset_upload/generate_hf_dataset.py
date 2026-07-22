@@ -105,6 +105,11 @@ class DatasetConfig:
     dataset_path: str = field(default="", metadata={"help": "Path to the dataset"})
     dataset_name: str = field(default=None, metadata={"help": "Name of the dataset (defaults to dataset_type)"})
     exclude_wrist_cam: bool = field(default=False, metadata={"help": "Exclude wrist camera views (MIT Franka only)"})
+    camera: str = field(default="head", metadata={"help": "Camera stream to use (LeRobot only)"})
+    subtask: str = field(default="", metadata={"help": "Optional exact-match task filter (LeRobot only)"})
+    data_source: str = field(
+        default="", metadata={"help": "RBM data_source tag; must match dataset_success_cutoff.txt (LeRobot only)"}
+    )
 
 
 @dataclass
@@ -1047,6 +1052,18 @@ def main(cfg: GenerateConfig):
         task_data = load_robofac_dataset(
             cfg.dataset.dataset_path,
             max_trajectories=cfg.output.max_trajectories,
+        )
+        trajectories = flatten_task_data(task_data)
+    elif "lerobot" in cfg.dataset.dataset_name.lower():
+        from dataset_upload.dataset_loaders.lerobot_loader import load_lerobot_dataset
+
+        print(f"Loading LeRobot dataset from: {cfg.dataset.dataset_path}")
+        task_data = load_lerobot_dataset(
+            cfg.dataset.dataset_path,
+            data_source=cfg.dataset.data_source or cfg.dataset.dataset_name,
+            camera=cfg.dataset.camera,
+            subtask=cfg.dataset.subtask,
+            max_frames=cfg.output.max_frames,
         )
         trajectories = flatten_task_data(task_data)
     else:

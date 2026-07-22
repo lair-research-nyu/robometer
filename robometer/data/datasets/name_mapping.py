@@ -93,4 +93,6 @@ DS_SHORT_NAME_MAPPING = {
     "abraranwar_usc_koch_rewind_rfm_usc_koch_rewind": "usc_koch_rewind",
     # RoboFAC
     "aliangdw_robofac_rbm_robofac": "robofac",
+    # Towerstack (local LeRobot v3.0 conversion; key = generate output path + subset, "/" -> "_")
+    "robometer_dataset_lerobot_towerstack_towerstack": "towerstack",
 }
