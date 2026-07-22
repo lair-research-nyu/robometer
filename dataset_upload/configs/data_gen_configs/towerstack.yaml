@@ -8,7 +8,7 @@
 # train_datasets at that directory. data_source must match the entry in
 # robometer/data/dataset_success_cutoff.txt.
 dataset:
-  dataset_path: /mnt/wdblack/chunk1
+  dataset_path: /scratch/ka3658/nyu-finger-robot/data/ultra/chunk1
   dataset_name: lerobot_towerstack
   camera: head
   subtask: ""            # e.g. "stack rings" to filter; "" = all tasks
