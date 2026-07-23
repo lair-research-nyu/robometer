@@ -107,6 +107,16 @@ class DatasetConfig:
     exclude_wrist_cam: bool = field(default=False, metadata={"help": "Exclude wrist camera views (MIT Franka only)"})
     camera: str = field(default="head", metadata={"help": "Camera stream to use (LeRobot only)"})
     subtask: str = field(default="", metadata={"help": "Optional exact-match task filter (LeRobot only)"})
+    split_file: str = field(
+        default="",
+        metadata={"help": "value_split.json with the shared train/val episode split; "
+                          "relative to dataset_path (LeRobot only)"},
+    )
+    split: str = field(
+        default="",
+        metadata={"help": "'train' or 'val': which side of split_file to keep; "
+                          "empty = all episodes (LeRobot only)"},
+    )
     data_source: str = field(
         default="", metadata={"help": "RBM data_source tag; must match dataset_success_cutoff.txt (LeRobot only)"}
     )
@@ -1064,6 +1074,8 @@ def main(cfg: GenerateConfig):
             camera=cfg.dataset.camera,
             subtask=cfg.dataset.subtask,
             max_frames=cfg.output.max_frames,
+            split_file=cfg.dataset.split_file,
+            split=cfg.dataset.split,
         )
         trajectories = flatten_task_data(task_data)
     else:

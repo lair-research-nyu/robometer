@@ -91,6 +91,8 @@ def load_lerobot_dataset(
     camera: str = "head",
     subtask: str = "",
     max_frames: int = 64,
+    split_file: str = "",
+    split: str = "",
 ) -> Dict[str, List[Dict]]:
     """Load a LeRobot v3.0 dataset and organize trajectories by task.
 
@@ -101,6 +103,12 @@ def load_lerobot_dataset(
         camera: which observation.images.<camera> video stream to use.
         subtask: optional exact-match filter on the episode task string.
         max_frames: frames decoded per episode (uniform subsample).
+        split_file: value_split.json holding the shared train/val episode
+            split (the one every value-estimation trainer + the viewer read).
+            Relative paths resolve against base_path. Requires ``split``.
+        split: "train" keeps episodes NOT in the file's val_episodes (episodes
+            the file does not mention stay in train); "val" keeps only
+            val_episodes. Empty = no split filter (all episodes).
 
     Returns:
         Dictionary mapping task names to lists of trajectory dictionaries.
@@ -108,6 +116,22 @@ def load_lerobot_dataset(
     root = Path(base_path)
     if not root.exists():
         raise FileNotFoundError(f"LeRobot dataset path not found: {root}")
+
+    val_episodes: set[int] | None = None
+    if split or split_file:
+        if not (split and split_file):
+            raise ValueError("split and split_file must be set together "
+                             f"(got split={split!r}, split_file={split_file!r})")
+        if split not in ("train", "val"):
+            raise ValueError(f"split must be 'train' or 'val', got {split!r}")
+        sf = Path(split_file)
+        if not sf.is_absolute():
+            sf = root / sf
+        if not sf.exists():
+            raise FileNotFoundError(f"split_file not found: {sf}")
+        val_episodes = {int(e) for e in json.loads(sf.read_text())["val_episodes"]}
+        if not val_episodes:
+            raise ValueError(f"split_file has no val_episodes: {sf}")
 
     info = json.loads((root / "meta" / "info.json").read_text())
     fps = float(info["fps"])
@@ -119,7 +143,9 @@ def load_lerobot_dataset(
             raise KeyError(f"camera {camera!r}: missing column {col!r} in episode metadata")
 
     print(f"Loading LeRobot dataset from: {root}")
-    print(f"  camera={camera} fps={fps} episodes={len(meta)} data_source={data_source}")
+    print(f"  camera={camera} fps={fps} episodes={len(meta)} data_source={data_source}"
+          + (f" split={split} ({len(val_episodes)} val episodes in file)"
+             if val_episodes is not None else ""))
 
     task_data: Dict[str, List[Dict]] = {}
     n_skipped = 0
@@ -129,6 +155,10 @@ def load_lerobot_dataset(
         task = _episode_task(row.get("tasks"))
         if subtask and task != subtask:
             continue
+        if val_episodes is not None:
+            in_val = int(row["episode_index"]) in val_episodes
+            if (split == "train") == in_val:   # train keeps non-val, val keeps val
+                continue
 
         exit_type = str(row.get("exit_type", "success")).lower()
         quality_label = QUALITY_LABEL_MAP.get(exit_type, "failure")

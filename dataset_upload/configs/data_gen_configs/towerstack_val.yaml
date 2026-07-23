@@ -1,0 +1,33 @@
+# Towerstack HELD-OUT split — the val_episodes of the shared value-estimation
+# split (meta/value_split.json, the same episodes recap/SARM hold out and the
+# viewer labels "val"). Robometer training uses this as its eval dataset;
+# towerstack.yaml (split: train) is the training counterpart.
+#
+#   uv run python -m dataset_upload.generate_hf_dataset \
+#     --config_path dataset_upload/configs/data_gen_configs/towerstack_val.yaml
+#
+# Same flow/notes as towerstack.yaml. Cache key after preprocess:
+#   robometer_dataset_lerobot_towerstack_val_towerstack
+dataset:
+  dataset_path: /scratch/ka3658/nyu-finger-robot/data/ultra/chunk1
+  dataset_name: lerobot_towerstack_val
+  camera: head
+  subtask: ""            # keep identical to towerstack.yaml
+  data_source: towerstack
+  split_file: meta/value_split.json   # relative to dataset_path
+  split: val
+
+output:
+  output_dir: robometer_dataset
+  max_trajectories: -1
+  max_frames: 64
+  use_video: true
+  fps: 10
+  shortest_edge_size: 240
+  center_crop: false
+  num_workers: 8           # each spawn worker re-imports TF (~2G); use 0
+                           # (sequential) on memory-capped login nodes
+
+hub:
+  push_to_hub: false
+  hub_repo_id: null

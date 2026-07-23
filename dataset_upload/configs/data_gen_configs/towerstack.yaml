@@ -13,6 +13,11 @@ dataset:
   camera: head
   subtask: ""            # e.g. "stack rings" to filter; "" = all tasks
   data_source: towerstack
+  # Shared value-estimation split: keep only episodes NOT in the file's
+  # val_episodes, so training never sees an episode the other trainers held
+  # out. towerstack_val.yaml generates the held-out counterpart.
+  split_file: meta/value_split.json   # relative to dataset_path
+  split: train
 
 output:
   output_dir: robometer_dataset

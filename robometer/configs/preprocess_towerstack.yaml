@@ -14,7 +14,13 @@
 #
 # Cache key = "<dataset_path>/<subset>" with "/" -> "_", so training uses:
 #   data.train_datasets=[robometer_dataset_lerobot_towerstack_towerstack]
+#   data.eval_datasets=[robometer_dataset_lerobot_towerstack_val_towerstack]
 # NOTE: absolute frame paths are baked into the cache — don't move it after.
+#
+# train = towerstack.yaml (split: train), eval = towerstack_val.yaml
+# (split: val) — the shared value_split.json held-out episodes, so robometer's
+# eval set matches what recap/SARM hold out and the viewer labels "val".
+# Generate BOTH with generate_hf_dataset before preprocessing.
 
 train_datasets:
   - "robometer_dataset/lerobot_towerstack"
@@ -23,7 +29,7 @@ train_subsets:
   - ["towerstack"]
 
 eval_datasets:
-  - "robometer_dataset/lerobot_towerstack"
+  - "robometer_dataset/lerobot_towerstack_val"
 
 eval_subsets:
   - ["towerstack"]
